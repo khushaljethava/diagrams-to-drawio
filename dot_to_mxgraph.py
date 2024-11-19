@@ -3,6 +3,7 @@ import pydot
 import xml.etree.ElementTree as ET
 import json
 import re
+import base64 
 
 def dot_to_mxgraph(dot_file_content):
     graph = dot_file_content
@@ -27,14 +28,13 @@ def dot_to_mxgraph(dot_file_content):
     for object in graph['objects']:
         if 'pos' in object:
             old_image_url = object['image']
-            # Split the file path by the "resources" word
-            split_path = old_image_url.split("resources")
-            append_path = split_path[1].replace("\\", "/").strip("/")
-
+            #create image base64 
+            with open(old_image_url, "rb") as image_file:
+              base64_string = base64.b64encode(image_file.read()).decode('utf-8')
             mx_cell = ET.SubElement(root, 'mxCell', {
                 "id": object['name'],
                 "value": object['label'],
-                "style": f"shape=image;image={new_url_base}{append_path}?raw=True",
+                "style": f"shape=image;image=data:image/png,{base64_string}",
                 # "style": f"shape=image;image={object['image']}",
                 "vertex": "1",
                 "parent": "1"
